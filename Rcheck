@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+
+set -e
+
+usage() {
+    echo "Object: The Script was designed to conveniently build rd of R and check R package."
+    echo "Developer: Shuangbin Xu"
+    echo "Email: xshuangbin@163.com"
+    echo
+    echo "Usage: $0 [OPTIONS]"
+    echo "  [-d]    - build the rd file."
+    echo "  [-r]    - build readme file."
+    echo "  [-b]    - build the package"
+    echo "  [-v]    - build no vignettes package"
+    echo "  [-i]    - install the package"
+    echo "  [-c]    - check the package with rcmdcheck"
+    echo "  [-k]    - check the package with general check"
+    echo "  [-n]    - check the package with cran check"
+    echo "  [-t]    - check the package with bioccheck"
+    echo "  [-a]    - build rd, readme file, package and check with rcmdcheck"
+}
+
+DESCRIPTION="`pwd`/DESCRIPTION"
+if [ ! -r "$DESCRIPTION" ]; then
+    echo "The current directory didn't exit DESCRIPTION file,"; 
+    echo "please check whether the path is in the target R package."
+    exit 1
+fi
+
+PKGNAME=$(sed -n "s/Package: *\([^ ]*\)/\1/p" $DESCRIPTION)
+PKGVERS=$(sed -n "s/Version: *\([^ ]*\)/\1/p" $DESCRIPTION)
+PKGSRC=$(basename "`pwd`")
+PKGTAR="$PKGNAME"_"$PKGVERS".tar.gz
+
+rd() {
+    Rscript -e 'library(methods);devtools::document()'
+}
+
+readme() {
+    Rscript -e 'rmarkdown::render("README.Rmd", encoding="UTF-8")'
+}
+
+build() {
+    Rscript -e 'devtools::build()'
+}
+
+build2() {
+    Rscript -e 'devtools::build(vignettes = FALSE)'
+}
+
+check(){
+    cd ..
+    Rscript -e 'rcmdcheck::rcmdcheck("'$PKGTAR'")'
+}
+
+check2() {
+    cd ..
+    R CMD check $PKGTAR
+}
+
+check3() {
+    cd ..
+    R CMD check --as-cran $PKGTAR
+}
+
+bioccheck() {
+    cd ..
+    Rscript -e 'BiocCheck::BiocCheck("'$PKGTAR'")'
+}
+
+install(){
+    cd ..
+    R CMD INSTALL $PKGTAR
+}
+
+while getopts ":drbvickntah" Option
+    do
+    case $Option in
+        d) ACTION=RD ;;
+        r) ACTION=README ;;
+        b) ACTION=BUILD ;;
+        v) ACTION=NOVIGNETTES ;;
+        i) ACTION=INSTALL ;;
+        c) ACTION=RCMDCHECK ;;
+        k) ACTION=CHECK ;;
+        n) ACTION=CRANCHECK ;;
+        t) ACTION=BIOCCHECK ;;
+        a) ACTION=ALL ;; 
+        h) usage ; exit -1 ;;
+        *) echo "unrecognized argument. use '-h' for usage information."; exit -1 ;;
+    esac
+    done
+
+case $ACTION in
+    RD) rd ;;
+    README) readme ;;
+    BUILD) build ;;
+    NOVIGNETTES) build2 ;;
+    INSTALL) install ;;
+    RCMDCHECK) check ;;
+    CHECK) check2 ;;
+    CRANCHECK) check3 ;;
+    BIOCCHECK) bioccheck ;;
+    ALL) rd; readme; build; check ;;
+esac
+

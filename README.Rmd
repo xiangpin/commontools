@@ -1,0 +1,35 @@
+---
+output:
+  md_document:
+  variant: gfm
+html_preview: false
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# commontools: The repository will save the common scripts to save time.
+
+## :writing_hand: Authors
+
+[Shuangbin Xu](https://github.com/xiangpin)
+
+School of Basic Medical Sciences, Southern Medical University
+
+## :arrow_down: Installation
+
+```r
+git clone https://github.com/xiangpin/commontools.git
+# then add your path environment.
+```
+
+## :white_check_mark: Usage
+
+```r
+# this is an example 
+# to see the usage of every script
+Rmarkdown -h
+```
+
+## :sparkling_heart:
+We welcome any contributions! By participating in this project you agree to bide
+by the terms outlined in the [Contributor Code of Conduct](CONDUCT.md).

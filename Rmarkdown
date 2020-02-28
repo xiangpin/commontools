@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+set -e
+
+usage() {
+    echo "Object: The Script was designed to comvert Rmarkdown to target file."
+    echo "Note: First install R and the rmarkdown packages"
+    echo "Developer: Shuangbin Xu"
+    echo "Email: xshuangbin@163.com"
+    echo
+    echo "Usage: $0 <-i Rmd>"
+    echo "  [-i Rmd]    - The Rmarkdown file."
+}
+
+Rmd=""
+
+while getopts ":i:h" Option
+    do
+    case $Option in
+        i ) Rmd=$OPTARG ;;
+        h ) usage ; exit -1 ;;
+	* ) echo "unrecognized argument. use '-h' for usage information."; exit -1 ;;
+    esac
+    done
+
+shift $(($OPTIND - 1))
+
+if [ -z "$Rmd" ]; then
+    usage
+fi
+
+if [ ! -r "$Rmd" ]; then
+    echo "Error: can't open input file '$Rmd'." >&2
+    exit 1
+fi
+
+Rscript -e 'rmarkdown::render("'$Rmd'")'
