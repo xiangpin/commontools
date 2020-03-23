@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+set -e
+
+usage() {
+    echo "Object: The Script was designed to install R packages on terminal of Unix."
+    echo "Note: First install R"
+    echo "Developer: Shuangbin Xu"
+    echo "Email: xshuangbin@163.com"
+    echo
+    echo "Usage: $0 <-c/-b> <-i names>"
+    echo "  [-c CRAN]            - if the packages is from CRAN."
+    echo "  [-b BIOCONDUCTOR]    - if the packages is from Bioconductor."
+    echo "  [-i Rmd]             - The names of R packages."
+}
+
+Rname=""
+
+while getopts ":i:cbh" Option
+    do
+    case $Option in
+        i) Rname=$OPTARG ;;
+        c) ACTION=CRAN ;;
+        b) ACTION=BIOCONDUCTOR ;;
+        h) usage ; exit -1 ;;
+	*) echo "unrecognized argument. use '-h' for usage information."; exit -1 ;;
+    esac
+    done
+
+shift $(($OPTIND - 1))
+
+if [ -z "$Rname" ]; then
+    echo "Error: The names of packages should be provided." >&2
+    usage
+fi
+
+lenRname=$(echo $Rname | awk -F "," '{print NF}')
+
+if (( $lenRname>1 )); then
+    tmp=$(echo $Rname | awk -F "," '{for(i=1;i<=NF-1;i++) printf("\"%s\",", $i);printf("\"%s\"", $NF)}')
+    Rname='c('$tmp')'
+else
+    Rname='"'$Rname'"'
+fi
+
+craninstall() {
+    Rscript -e 'install.packages('$Rname')'
+}
+
+Biocinstall() {
+    Rscript -e 'BiocManager::install('$Rname')'
+}
+
+case $ACTION in
+    CRAN) craninstall ;;
+    BIOCONDUCTOR) Biocinstall ;;
+esac
