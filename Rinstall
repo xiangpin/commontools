@@ -11,7 +11,7 @@ usage() {
     echo "Usage: $0 <-c/-b> <-i names>"
     echo "  [-c CRAN]            - if the packages is from CRAN."
     echo "  [-b BIOCONDUCTOR]    - if the packages is from Bioconductor."
-    echo "  [-i Rmd]             - The names of R packages."
+    echo "  [-i names]           - The names of R packages, The comma should be used for multiple packages."
 }
 
 Rname=""
