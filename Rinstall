@@ -12,16 +12,20 @@ usage() {
     echo "  [-c CRAN]            - if the packages is from CRAN."
     echo "  [-b BIOCONDUCTOR]    - if the packages is from Bioconductor."
     echo "  [-i names]           - The names of R packages, The comma should be used for multiple packages."
+    echo "  [-t threads]         - the number of thread, default is 2."
+    echo "  [-n nolock]          - using --no-lock to install."
 }
 
 Rname=""
 
-while getopts ":i:cbh" Option
+while getopts ":i:t:ncbh" Option
     do
     case $Option in
         i) Rname=$OPTARG ;;
+        t) Ncpus=$OPTARG ;;
         c) ACTION=CRAN ;;
         b) ACTION=BIOCONDUCTOR ;;
+        n) ACTION2=NOLOCK ;;
         h) usage ; exit -1 ;;
 	*) echo "unrecognized argument. use '-h' for usage information."; exit -1 ;;
     esac
@@ -34,6 +38,10 @@ if [ -z "$Rname" ]; then
     usage
 fi
 
+if [ -z "$Ncpus" ]; then
+    $Ncpus=2
+fi
+
 lenRname=$(echo $Rname | awk -F "," '{print NF}')
 
 if (( $lenRname>1 )); then
@@ -44,14 +52,24 @@ else
 fi
 
 craninstall() {
-    Rscript -e 'install.packages('$Rname')'
+    Rscript -e 'install.packages('$Rname', Ncpus='$Ncpus')'
+}
+
+craninstall2(){
+    Rscript -e 'install.packages('$Rname', INSTALL_opts="--no-lock", Ncpus='$Ncpus')'
 }
 
 Biocinstall() {
-    Rscript -e 'BiocManager::install('$Rname')'
+    Rscript -e 'BiocManager::install('$Rname', Ncpus='$Ncpus')'
 }
 
-case $ACTION in
-    CRAN) craninstall ;;
-    BIOCONDUCTOR) Biocinstall ;;
+Biocinstall2(){
+    Rscript -e 'BiocManager::install('$Rname', INSTALL_opts="--no-lock", Ncpus='$Ncpus')'
+}
+
+case $ACTION+$ACTION2 in
+    CRAN+) craninstall ;;
+    BIOCONDUCTOR+) Biocinstall ;;
+    CRAN+NOLOCK) craninstall2 ;;
+    BIOCONDUCTOR+NOLOCK) Biocinstall2 ;;
 esac
