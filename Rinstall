@@ -8,7 +8,7 @@ usage() {
     echo "Developer: Shuangbin Xu"
     echo "Email: xshuangbin@163.com"
     echo
-    echo "Usage: $0 <-c/-b> <-i names>"
+    echo "Usage: $0 <-c/-b> <-i names> [optional]"
     echo "  [-c CRAN]            - if the packages is from CRAN."
     echo "  [-b BIOCONDUCTOR]    - if the packages is from Bioconductor."
     echo "  [-i names]           - The names of R packages, The comma should be used for multiple packages."
@@ -42,6 +42,7 @@ if [ -z "$Ncpus" ]; then
     $Ncpus=2
 fi
 
+Rname=$(echo $Rname | sed 's/\x27//g')
 lenRname=$(echo $Rname | awk -F "," '{print NF}')
 
 if (( $lenRname>1 )); then
