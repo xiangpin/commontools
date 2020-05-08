@@ -39,7 +39,7 @@ if [ -z "$Rname" ]; then
 fi
 
 if [ -z "$Ncpus" ]; then
-    $Ncpus=2
+    Ncpus=2
 fi
 
 Rname=$(echo $Rname | sed 's/\x27//g')
