@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+set -e
+
+usage() {
+    echo "Object: The Script was designed to comvert fasta file, one sequence contained multiple lines, to single line sequence."
+    echo "Note: The awk should be installed !"
+    echo "Developer: Shuangbin Xu"
+    echo "Email: xshuangbin@163.com"
+    echo
+    echo "Usage: $0 <-i fasta> [-o output]"
+    echo "  <-i fasta>   - The fasta file (required)."
+    echo "  [-o output]  - The output file."
+}
+
+fasta=""
+output=""
+
+while getopts ":i:o:h" Option
+    do
+    case $Option in
+        i ) fasta=$OPTARG ;;
+        o ) output=$OPTARG ;;
+        h ) usage ; exit -1 ;;
+	* ) echo "unrecognized argument. use '-h' for usage information."; exit -1 ;;
+    esac
+    done
+
+shift $(($OPTIND - 1))
+
+if [ -z "$fasta" ]; then
+    usage
+fi
+
+if [ ! -r "$fasta" ]; then
+    #echo "Error: can't open input file '$fasta'." >&2
+    exit 1
+fi
+
+# awk '/^>/ {printf("\n%s\n", $0);next;}{printf("%s",$0)}END{printf("\n")}' fastafile . This is on Terminal
+
+out=$(awk '/^>/ {printf("\\n%s\\n", $0);next;}{printf("%s",$0)}' $fasta)
+
+if [ -z "$output" ]; then
+    echo -e $out | tail -n +2
+else
+    echo -e $out | tail -n +2 > $output
+fi
+
